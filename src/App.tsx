@@ -1,32 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserForm } from './components/UserForm';
 import { ZodiacMap } from './components/ZodiacMap';
 import { UserTable } from './components/UserTable';
 import { UserList } from './components/UserList';
 import { zodiacSigns } from './data/zodiacData';
 import type { User } from './types';
-import { Download } from 'lucide-react';
+import { Download, Save } from 'lucide-react';
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedSign, setSelectedSign] = useState<string | null>(null);
   const [placedUsers, setPlacedUsers] = useState<User[]>([]);
 
+  // ローカルストレージからデータを読み込む
+  useEffect(() => {
+    const savedUsers = localStorage.getItem('unplacedUsers');
+    const savedPlacedUsers = localStorage.getItem('placedUsers');
+    
+    if (savedUsers) {
+      setUsers(JSON.parse(savedUsers));
+    }
+    if (savedPlacedUsers) {
+      setPlacedUsers(JSON.parse(savedPlacedUsers));
+    }
+  }, []);
+
   const handleAddUser = (name: string, sign: string) => {
-    setUsers([...users, { id: crypto.randomUUID(), name, sign, position: null }]);
+    const newUsers = [...users, { id: crypto.randomUUID(), name, sign, position: null }];
+    setUsers(newUsers);
+    localStorage.setItem('unplacedUsers', JSON.stringify(newUsers));
   };
 
   const handleUserPlaced = (user: User, position: { x: number, y: number }) => {
-    setPlacedUsers([...placedUsers, { ...user, position }]);
-    setUsers(users.filter(u => u.id !== user.id));
+    const newPlacedUsers = [...placedUsers, { ...user, position }];
+    const newUsers = users.filter(u => u.id !== user.id);
+    setPlacedUsers(newPlacedUsers);
+    setUsers(newUsers);
+    localStorage.setItem('placedUsers', JSON.stringify(newPlacedUsers));
+    localStorage.setItem('unplacedUsers', JSON.stringify(newUsers));
   };
 
   const handleRemoveUser = (userId: string) => {
     const userToRemove = placedUsers.find(u => u.id === userId);
     if (userToRemove) {
-      setPlacedUsers(placedUsers.filter(u => u.id !== userId));
-      setUsers([...users, { ...userToRemove, position: null }]);
+      const newPlacedUsers = placedUsers.filter(u => u.id !== userId);
+      const newUsers = [...users, { ...userToRemove, position: null }];
+      setPlacedUsers(newPlacedUsers);
+      setUsers(newUsers);
+      localStorage.setItem('placedUsers', JSON.stringify(newPlacedUsers));
+      localStorage.setItem('unplacedUsers', JSON.stringify(newUsers));
     }
+  };
+
+  const handleSave = () => {
+    localStorage.setItem('unplacedUsers', JSON.stringify(users));
+    localStorage.setItem('placedUsers', JSON.stringify(placedUsers));
   };
 
   const handleDownloadImage = () => {
@@ -93,6 +121,20 @@ function App() {
     img.src = imgSrc;
   };
 
+  const handleUpdateUnplacedUser = (userId: string, name: string, sign: string) => {
+    const newUsers = users.map(user => 
+      user.id === userId ? { ...user, name, sign } : user
+    );
+    setUsers(newUsers);
+    localStorage.setItem('unplacedUsers', JSON.stringify(newUsers));
+  };
+
+  const handleRemoveUnplacedUser = (userId: string) => {
+    const newUsers = users.filter(user => user.id !== userId);
+    setUsers(newUsers);
+    localStorage.setItem('unplacedUsers', JSON.stringify(newUsers));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 py-8">
       <div className="container mx-auto px-8 max-w-[1800px]">
@@ -110,7 +152,14 @@ function App() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-50/50 via-white/50 to-purple-50/50 rounded-3xl blur-xl"></div>
               <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-6">
-                <div className="flex justify-end mb-6">
+                <div className="flex justify-end gap-4 mb-6">
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl hover:translate-y-[-2px] active:translate-y-[0px] text-base font-medium"
+                  >
+                    <Save size={20} />
+                    保存
+                  </button>
                   <button
                     onClick={handleDownloadImage}
                     className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:translate-y-[-2px] active:translate-y-[0px] text-base font-medium"
@@ -151,7 +200,11 @@ function App() {
                 <h2 className="text-2xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text mb-4">
                   登録済みユーザー
                 </h2>
-                <UserList users={users} />
+                <UserList 
+                  users={users} 
+                  onUpdateUser={handleUpdateUnplacedUser}
+                  onRemoveUser={handleRemoveUnplacedUser}
+                />
               </div>
             )}
           </div>

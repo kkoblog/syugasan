@@ -19,7 +19,6 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onRemoveUser }) => 
           <thead>
             <tr className="border-b border-indigo-100/20">
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">名前</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">月星座</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">反転星座</th>
               <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">操作</th>
             </tr>
@@ -31,14 +30,6 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onRemoveUser }) => 
                 className="border-b border-indigo-100/10 hover:bg-indigo-50/30 transition-colors"
               >
                 <td className="px-4 py-3 text-sm text-gray-700">{user.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-700">
-                  <div className="flex items-center gap-2">
-                    <span className={`${zodiacSigns[user.sign]?.color} w-6 h-6 rounded-full flex items-center justify-center text-white text-xs`}>
-                      {zodiacSigns[user.sign]?.symbol}
-                    </span>
-                    {zodiacSigns[user.sign]?.name}
-                  </div>
-                </td>
                 <td className="px-4 py-3 text-sm text-gray-700">
                   {user.placedOppositeSign && (
                     <div className="flex items-center gap-2">
@@ -61,7 +52,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onRemoveUser }) => 
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
                   ユーザーはまだ配置されていません
                 </td>
               </tr>

@@ -35,7 +35,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onAddUser }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          月星座
+          反転月星座
         </label>
         <select
           value={sign}
@@ -43,7 +43,7 @@ export const UserForm: React.FC<UserFormProps> = ({ onAddUser }) => {
           className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           required
         >
-          <option value="">月星座を選択</option>
+          <option value="">反転月星座を選択</option>
           {Object.entries(zodiacSigns).map(([key, sign]) => (
             <option key={key} value={key}>
               {sign.name}
